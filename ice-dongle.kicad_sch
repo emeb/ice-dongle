@@ -3372,6 +3372,11 @@
     (effects (font (size 1.524 1.524)) (justify right bottom))
     (uuid 83957d77-7f36-4209-8c47-86f2ec5df4d3)
   )
+  (text "Pin 37 (USB_PU) is output-only\nwhen pin 35 is used as PLL pad input."
+    (at 322.58 46.99 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid 96c4cd98-d21c-4e90-8361-9426c274c0e2)
+  )
   (text "NOTE: Pin numbering of this symbol\nis reversed from that used by\nAdafruit "
     (at 365.76 204.47 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
