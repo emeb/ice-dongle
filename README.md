@@ -1,6 +1,8 @@
 # ice-dongle
 USB-C Dongle with ice40 UP5k FPGA
 
+<img src="ice-dongle.png" width="640" />
+
 ## Abstract
 This is a small USB connected FPGA board in a "dongle" form-factor. Note that
 it's not a true dongle since it doesn't have a USB plug (USB-C plugs are not
