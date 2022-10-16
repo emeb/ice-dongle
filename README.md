@@ -26,7 +26,8 @@ is via the Adafruit "Pogo Pin Probe Clip" which should attach easily over
 the pads.
 
 ## Status
-22-10-15: Boards are back from OSHpark and so far things are working.
+### 22-10-15
+Boards are back from OSHpark and so far things are working.
 * USB power, regulators and clock oscillator are running properly.
   * Minor silkscreen error was discovered - reference designators for R14 and C10 swapped.
 * FPGA configures via programming header and from SPI flash.
@@ -34,6 +35,20 @@ the pads.
 * RGB LED works.
 * EYESPI bus works with ST7789 TFT LCD
 * PSRAM works.
-* USB interface is still TBD.
 
 <img src="doc/ice-dongle_hw.jpg" width="640" />
+
+### 22-10-16
+USB FS interface is fully functional with the NO2 Bootloader. I've forked it to
+add a custom BOARD target for ice-dongle but I'll submit a PR to the main project
+when things settle down a bit. For the time being here's my fork:
+
+https://github.com/emeb/no2bootloader
+
+To build, clone that and follow the directions in the README. A few additional
+notes:
+* Don't forget to `git submodule update --init` to get all the related material
+from the NO2 ecosystem.
+* To build use `make BOARD=ice-dongle bootloader`
+* The `riscv_lcd` gateware project has a `make dfu` target that shows how to use
+the bootloader.

@@ -32,6 +32,7 @@ ICETIME = $(TOOLS)/bin/icetime
 ICEPROG = $(TOOLS)/bin/iceprog
 ICEBRAM = $(TOOLS)/bin/icebram
 CDCPROG = cdc_prog
+DFU_UTIL = dfu-util
 VERILATOR = verilator
 TECH_LIB = $(TOOLS)/share/yosys/ice40/cells_sim.v
 
@@ -66,6 +67,9 @@ recode:
     
 flash: $(PROJ).bin
 	$(CDCPROG) -w -p /dev/ttyACM0 $<
+
+dfu: $(PROJ).bin
+	sudo $(DFU_UTIL) -d1d50:6146 -a0 -D $<
 
 lint: $(SRC)
 	$(VERILATOR) --lint-only -Wall -DNO_ICE40_DEFAULT_ASSIGNMENTS --top-module $(PROJ) $(TECH_LIB) $(SRC)
