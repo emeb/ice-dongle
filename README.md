@@ -21,9 +21,12 @@ that ecosystem should port over with minimal changes. It includes 8MB of flash
 and 8MB of PSRAM, as well as an RGB LED and a user button.
 
 Initial programming of the FPGA bitstream takes place through a 1.27mm SMD
-header footprint on the back of the board. The recommended way to access this
-is via the Adafruit "Pogo Pin Probe Clip" which should attach easily over
-the pads.
+header footprint on the back of the board. The original intent was to access
+this temporarily via the Adafruit "Pogo Pin Probe Clip" which should have
+attached easily over the pads. Unfortunately the pogo pin row spacing is too
+narrow for the SMT header pads so I ended up soldering on a header and using
+a normal cable. This may be fixed in future revisions, but for now an actual
+header + cable is probably more reliable for long-term development.
 
 ## Status
 ### 22-10-15
