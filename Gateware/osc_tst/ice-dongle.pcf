@@ -1,0 +1,63 @@
+######################
+# ice-dongle pinout
+######################
+
+# Boot Button
+set_io BTN 2
+
+# StemmaQT / QWIIC 
+set_io QWIIC_SCL 3
+set_io QWIIC_SDA 43
+
+# Spares on Programming Header
+set_io SPARE9 12
+set_io SPARE10 11
+
+# testpoints
+set_io TP1 9
+set_io TP2 10
+
+# NC pins
+set_io NC4 4
+set_io NC13 13
+
+# SPI Memory interface
+set_io MEM_SPI_PICO_IO0 14
+set_io MEM_SPI_POCI_IO1 17
+set_io MEM_SPI_SCLK 15
+set_io MEM_SPI_CS 16
+set_io MEM_SPI_WP_IO2 18
+set_io MEM_SPI_HLD_IO3 19
+set_io PSRAM_CS 6
+
+# Eye-SPI connector
+set_io ES_BKL 36
+set_io ES_SCK 34
+set_io ES_PICO 32
+set_io ES_POCI 31
+set_io ES_DC 28
+set_io ES_RST 27
+set_io ES_TFTCS 26
+set_io ES_SDCS 25
+set_io ES_MEMCS 23
+set_io ES_TSCS 21
+set_io ES_SCL 20
+set_io ES_SDA 48
+set_io ES_INT 47
+set_io ES_BUSY 46
+set_io ES_GP1 45
+set_io ES_GP2 44
+
+# USB
+set_io USB_DP 42
+set_io USB_DM 38
+set_io USB_PU 37
+
+# 12MHz Clock Oscillator
+set_io CLK12MHZ 35
+
+# RGB LED
+set_io RGB0 39
+set_io RGB1 40
+set_io RGB2 41
+
