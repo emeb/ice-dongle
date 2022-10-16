@@ -1,7 +1,7 @@
 # ice-dongle
 USB-C Dongle with ice40 UP5k FPGA
 
-<img src="ice-dongle.png" width="640" />
+<img src="doc/ice-dongle.png" width="640" />
 
 ## Abstract
 This is a small USB connected FPGA board in a "dongle" form-factor. Note that
@@ -25,3 +25,15 @@ header footprint on the back of the board. The recommended way to access this
 is via the Adafruit "Pogo Pin Probe Clip" which should attach easily over
 the pads.
 
+## Status
+22-10-15: Boards are back from OSHpark and so far things are working.
+* USB power, regulators and clock oscillator are running properly.
+  * Minor silkscreen error was discovered - reference designators for R14 and C10 swapped.
+* FPGA configures via programming header and from SPI flash.
+* SPI flash can be written from the programming header.
+* RGB LED works.
+* EYESPI bus works with ST7789 TFT LCD
+* PSRAM works.
+* USB interface is still TBD.
+
+<img src="doc/ice-dongle_hw.jpg" width="640" />
