@@ -82,7 +82,7 @@ void main()
 	/* read some data */
 	{
 		uint8_t read[128];
-		flash_read(SPI0, read, 0, 128);
+		flash_read(SPI0, read, 0x200000, 128);
 		for(i=0;i<128;i+=4)
 		{
 			gprintf("%02X: %02X %02X %02X %02X", i, read[i], read[i+1], read[i+2], read[i+3] );
@@ -150,7 +150,7 @@ void main()
 	//	ST7789_WHITE, ST7789_BLACK);
 #endif
 	
-#if 0
+#if 1
 	/* color fill + text fonts */
 	printf("Color Fill & Fonts\n\r");
 	st7789_fillScreen(ST7789_MAGENTA);
@@ -199,12 +199,13 @@ void main()
 	clkcnt_delayms(1000);
 #endif
 
-#if 0
+#if 1
 	/* test image blit from flash */
 	{
+		flash_init(SPI0);	// wake up the flash chip
 		uint16_t blit[ST7789_TFTWIDTH*4];
 		uint32_t blitaddr, blitsz;
-		blitaddr = 0x200000;
+		blitaddr = 0xa0000;
 		blitsz = ST7789_TFTWIDTH*4*sizeof(uint16_t);
 		for(i=0;i<ST7789_TFTHEIGHT;i+=4)
 		{
@@ -255,6 +256,6 @@ void main()
 		if((c=acia_getc()) != EOF)
 			acia_putc(c);
 #endif		
-		clkcnt_delayms(100);
+		clkcnt_delayms(200);
 	}
 }

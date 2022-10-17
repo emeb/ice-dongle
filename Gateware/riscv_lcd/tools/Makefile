@@ -9,6 +9,7 @@ IMGCVT = png2rgb565.sh
 FFMPEG = ffmpeg
 DD = dd
 CDCPROG = cdc_prog
+DFU_UTIL = dfu-util
 
 all: $(IMG).565
 
@@ -20,6 +21,9 @@ all: $(IMG).565
 flash: $(IMG).565
 	$(CDCPROG) -w -a 0x200000 -p /dev/ttyACM0 $<
 	
+dfu: $(IMG).565
+	sudo $(DFU_UTIL) -d1d50:6146 -a1 -D $<
+
 clean:
 	rm -f *.565
 

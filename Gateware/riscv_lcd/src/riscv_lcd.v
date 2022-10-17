@@ -161,6 +161,23 @@ module riscv_lcd(
 		.D_IN_1()
 	);
 	
+	// LED dimming PWM
+	reg [3:0] pwmcnt;
+	reg pwm;
+	always @(posedge clk)
+	begin
+		if(reset)
+		begin
+			pwmcnt <= 4'h0;
+			pwm <= 1'b0;
+		end
+		else
+		begin
+			pwmcnt <= pwmcnt + 4'h1;
+			pwm <= pwmcnt > 0 ? 1'b0 : 1'b1;
+		end
+	end
+	
 	// RGB LED Driver IP core
 	SB_RGBA_DRV #(
 		.CURRENT_MODE("0b1"),
@@ -169,7 +186,7 @@ module riscv_lcd(
 		.RGB2_CURRENT("0b000011")
 	) RGBA_DRIVER (
 		.CURREN(1'b1),
-		.RGBLEDEN(1'b1),
+		.RGBLEDEN(pwm),
 		.RGB0PWM(gpio_o[17]),
 		.RGB1PWM(gpio_o[18]),
 		.RGB2PWM(gpio_o[19]),
