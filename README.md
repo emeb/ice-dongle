@@ -46,7 +46,7 @@ USB FS interface is fully functional with the NO2 Bootloader. I've forked it to
 add a custom BOARD target for ice-dongle but I'll submit a PR to the main project
 when things settle down a bit. For the time being here's my fork:
 
-https://github.com/emeb/no2bootloader
+[NO2 Bootloader](https://github.com/emeb/no2bootloader)
 
 To build, clone that and follow the directions in the README. A few additional
 notes:
@@ -55,3 +55,9 @@ from the NO2 ecosystem.
 * To build use `make BOARD=ice-dongle bootloader`
 * The `riscv_lcd` gateware project has a `make dfu` target that shows how to use
 the bootloader.
+
+### 22-10-17
+Ordered some helper boards to make interfacing easier:
+* ice-fpc-pmod
+* ice-prog-adapt
+find out more about them in the [Hardware](Hardware) directory.
