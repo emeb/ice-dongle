@@ -60,4 +60,5 @@ the bootloader.
 Ordered some helper boards to make interfacing easier:
 * ice-fpc-pmod
 * ice-prog-adapt
+
 find out more about them in the [Hardware](Hardware) directory.
