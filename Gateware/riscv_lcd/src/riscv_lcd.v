@@ -35,6 +35,10 @@ module riscv_lcd(
 	// unused Eye-SPI selects
 	output ES_SDCS, ES_MEMCS, ES_TSCS,
 	
+	// spares on programming header
+	output SPARE10,
+	input SPARE9,
+	
 	// LED - via drivers
 	output RGB0, RGB1, RGB2
 );
@@ -132,7 +136,7 @@ module riscv_lcd(
 		.NEG_TRIGGER(1'b0),
 		.IO_STANDARD("SB_LVCMOS")
 	) urx_io (
-		.PACKAGE_PIN(ES_GP1),
+		.PACKAGE_PIN(SPARE9),
 		.LATCH_INPUT_VALUE(1'b0),
 		.CLOCK_ENABLE(1'b0),
 		.INPUT_CLK(1'b0),
@@ -149,7 +153,7 @@ module riscv_lcd(
 		.NEG_TRIGGER(1'b0),
 		.IO_STANDARD("SB_LVCMOS")
 	) utx_io (
-		.PACKAGE_PIN(ES_GP2),
+		.PACKAGE_PIN(SPARE10),
 		.LATCH_INPUT_VALUE(1'b0),
 		.CLOCK_ENABLE(1'b0),
 		.INPUT_CLK(1'b0),
