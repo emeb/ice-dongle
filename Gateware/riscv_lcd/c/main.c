@@ -222,9 +222,15 @@ void main()
 
 	cnt = 0;
 	printf("Looping...\n\r");
+	clkcnt_reg = 0;
 	while(1)
 	{
-		gp_out = (gp_out&~(7<<17))|((cnt&7)<<17);
+		/* blink LED @ 200ms rate */
+		if(clkcnt_reg > (24000*200))
+		{
+			gp_out = (gp_out&~(7<<17))|((cnt&7)<<17);
+			clkcnt_reg = 0;
+		}
 		
 #if 0
 		/* master transmit test */
@@ -251,11 +257,11 @@ void main()
 		
 		cnt++;
 		
-#if 0
+#if 1
 		/* simple echo */
-		if((c=acia_getc()) != EOF)
+		int c=acia_getc();
+		if(c != EOF)
 			acia_putc(c);
 #endif		
-		clkcnt_delayms(200);
 	}
 }
