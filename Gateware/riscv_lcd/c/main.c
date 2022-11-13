@@ -13,6 +13,7 @@
 #include "clkcnt.h"
 #include "st7789.h"
 #include "i2c.h"
+#include "cmd.h"
 
 /* build time */
 const char *bdate = __DATE__;
@@ -59,10 +60,12 @@ void main()
 	spi_init(SPI0);
 	spi_init(SPI1);
 	
+#if 0
 	/* Init LCD */
 	st7789_init(SPI1);
 	printf("LCD initialized\n\r");
-	
+#endif
+
 #if 0
 	/* test lcd text */
 	for(i=0;i<40;i++)
@@ -150,7 +153,7 @@ void main()
 	//	ST7789_WHITE, ST7789_BLACK);
 #endif
 	
-#if 1
+#if 0
 	/* color fill + text fonts */
 	printf("Color Fill & Fonts\n\r");
 	st7789_fillScreen(ST7789_MAGENTA);
@@ -199,7 +202,7 @@ void main()
 	clkcnt_delayms(1000);
 #endif
 
-#if 1
+#if 0
 	/* test image blit from flash */
 	{
 		flash_init(SPI0);	// wake up the flash chip
@@ -219,7 +222,13 @@ void main()
 	/* Test I2C */
 	//i2c_init(I2C0);
 	//printf("I2C0 Initialized\n\r");
-
+	
+#if 1
+	/* command interp */
+	cmd_init();
+	printf("Command Interp Initialized\n\r");
+#endif
+	
 	cnt = 0;
 	printf("Looping...\n\r");
 	clkcnt_reg = 0;
@@ -257,11 +266,15 @@ void main()
 		
 		cnt++;
 		
-#if 1
+#if 0
 		/* simple echo */
 		int c=acia_getc();
 		if(c != EOF)
 			acia_putc(c);
-#endif		
+#endif
+#if 1
+		/* command processing */
+		cmd_proc();
+#endif
 	}
 }
