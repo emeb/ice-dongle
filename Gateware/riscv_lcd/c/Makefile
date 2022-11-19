@@ -9,8 +9,8 @@ ICEPROG = iceprog
 HEXDUMP = hexdump
 HEXDUMP_ARGS = -v -e '1/4 "%08x" "\n"'
 
-#CFLAGS=-Wall -Os -march=rv32i -mabi=ilp32 -ffreestanding -nostartfiles -flto
 CFLAGS=-Wall -Os -march=rv32i -mabi=ilp32 -ffreestanding -flto -nostartfiles -fomit-frame-pointer
+#CFLAGS=-Wall -Os -march=rv32i -mabi=ilp32 -ffreestanding -flto -nostartfiles -fomit-frame-pointer -Wl,--gc-section --specs=nano.specs
 
 HEADER = riscv_lcd.h acia.h spi.h flash.h clkcnt.h ili9341.h i2c.h printf.h \
 		psram.h 		cmd.h cli.h cli_defs.h
@@ -26,6 +26,7 @@ disassemble: main.elf
 
 %.bin: %.elf
 	$(OBJCOPY) -O binary $< $@
+#	$(OBJCOPY) -j .text -O binary $< $@
 
 %.hex: %.bin
 	$(HEXDUMP) $(HEXDUMP_ARGS) $< >$@

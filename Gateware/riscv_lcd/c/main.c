@@ -60,7 +60,7 @@ void main()
 	spi_init(SPI0);
 	spi_init(SPI1);
 	
-#if 0
+#if 1
 	/* Init LCD */
 	st7789_init(SPI1);
 	printf("LCD initialized\n\r");
@@ -153,7 +153,7 @@ void main()
 	//	ST7789_WHITE, ST7789_BLACK);
 #endif
 	
-#if 0
+#if 1
 	/* color fill + text fonts */
 	printf("Color Fill & Fonts\n\r");
 	st7789_fillScreen(ST7789_MAGENTA);
@@ -202,7 +202,7 @@ void main()
 	clkcnt_delayms(1000);
 #endif
 
-#if 0
+#if 1
 	/* test image blit from flash */
 	{
 		flash_init(SPI0);	// wake up the flash chip
@@ -223,14 +223,14 @@ void main()
 	//i2c_init(I2C0);
 	//printf("I2C0 Initialized\n\r");
 	
-#if 1
+#if 0
 	/* command interp */
+	printf("Command Interp\n\r");
 	cmd_init();
-	printf("Command Interp Initialized\n\r");
 #endif
 	
 	cnt = 0;
-	printf("Looping...\n\r");
+	//printf("Looping...\n\r");
 	clkcnt_reg = 0;
 	while(1)
 	{
@@ -266,13 +266,13 @@ void main()
 		
 		cnt++;
 		
-#if 0
+#if 1
 		/* simple echo */
 		int c=acia_getc();
 		if(c != EOF)
 			acia_putc(c);
 #endif
-#if 1
+#if 0
 		/* command processing */
 		cmd_proc();
 #endif

@@ -16,7 +16,7 @@ cli_t cli;
  */
 static cli_status_t help_func(int argc, char **argv)
 {
-    cli.println("HELP function executed");
+    cli.println("HELP function executed\n");
     return CLI_OK;
 }
 
@@ -25,11 +25,11 @@ static cli_status_t help_func(int argc, char **argv)
  */
 static cli_status_t blink_func(int argc, char **argv)
 {
-    if(argc > 0)
+    if(argc > 1)
     {
         if(strcmp(argv[1], "-help") == 0)
         {
-            cli.println("BLINK help menu");
+            cli.println("BLINK help menu\n");
         }
         else
         {
@@ -38,7 +38,7 @@ static cli_status_t blink_func(int argc, char **argv)
     }
     else
     {
-        cli.println("BLINK function executed");
+        cli.println("BLINK function executed\n");
     }
     return CLI_OK;
 }
@@ -48,7 +48,13 @@ static cli_status_t blink_func(int argc, char **argv)
  */
 void println(char *string)
 {
-    printf("%s\n\r", string);
+    while(*string)
+	{
+		acia_putc(*string);
+		if(*string=='\n')
+			acia_putc('\r');
+		string++;
+	}
 }
 
 /*
@@ -84,7 +90,10 @@ void cmd_proc(void)
 	/* send char to CLI if available */
 	int c=acia_getc();
 	if(c != EOF)
+	{
 		cli_put(&cli, c);
+		acia_putc(c);
+	}
 	
 	/* process CLI */
 	cli_process(&cli);
