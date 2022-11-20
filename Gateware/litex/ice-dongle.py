@@ -112,6 +112,7 @@ class BaseSoC(SoCCore):
         # Disable Integrated ROM/SRAM since too large for iCE40 and UP5K has specific SPRAM.
         kwargs["integrated_sram_size"] = 0
         kwargs["integrated_rom_size"]  = 0
+        kwargs["cpu_variant"] = "lite"
         SoCCore.__init__(self, platform, sys_clk_freq, ident="LiteX SoC on ice-dongle", **kwargs)
 
         # 128KB SPRAM (used as 64kB SRAM / 64kB RAM) -----------------------------------------------
@@ -156,7 +157,7 @@ def main():
     soc = BaseSoC(
         bios_flash_offset   = int(args.bios_flash_offset, 0),
         sys_clk_freq        = args.sys_clk_freq,
-		revision            = args.revision,
+        revision            = args.revision,
         **parser.soc_argdict
     )
     builder = Builder(soc, **parser.builder_argdict)
