@@ -62,3 +62,14 @@ Ordered some helper boards to make interfacing easier:
 * ice-prog-adapt
 
 find out more about them in the [Hardware](Hardware) directory.
+
+### 22-11-20
+* Sylvain Munaut (@tnt) has built up a couple ice-dongle boards and confirmed that
+they work outside my lab. He did spot another silkscreen error - R10 and C5 reference
+designators are swapped. This doesn't significantly affect the board operation but
+should be corrected.
+* Updated NO2 board definition to put serial pins on programming
+header and sent a PR which has been accepted. You can now use the mainline
+NO2 bootloader repo instead of my fork.
+* Added a LiteX gateware design. This works but even a minimal demo uses > 80% of
+the FPGA resources.
