@@ -73,3 +73,6 @@ header and sent a PR which has been accepted. You can now use the mainline
 NO2 bootloader repo instead of my fork.
 * Added a LiteX gateware design. This works but even a minimal demo uses > 80% of
 the FPGA resources.
+
+### 22-11-21
+Corrected silkscreen errors and bumped revision to V0.1a
