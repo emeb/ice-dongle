@@ -1,0 +1,3 @@
+[submodule "Gateware/6502/Gateware/6502/verilog-6502"]
+	path = Gateware/6502/Gateware/6502/verilog-6502
+	url = https://github.com/hoglet67/verilog-6502.git
