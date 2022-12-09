@@ -1,0 +1,18 @@
+## pkg: sg48
+
+# USB
+set_io -nowarn usb_dp 42
+set_io -nowarn usb_dn 38
+set_io -nowarn usb_pu 37
+
+# Button
+set_io -nowarn -pullup yes -pullup_resistor 10K btn 2
+
+# Clock
+set_io -nowarn clk_in 35
+set_frequency clk_in 12
+
+# RGB
+set_io -nowarn RGB0 39
+set_io -nowarn RGB1 40
+set_io -nowarn RGB2 41
