@@ -1,3 +1,14 @@
+ICE-Dongle ACM + 6502 project
+=============================
+
+This project is a combination of Sylvain Munaut's Nitro μACM Example
+with a small 65c02 CPU system. I'll be fleshing it out further but for
+now it's just a processor, RAM, ROM, 8-bit GPIO and a serial port interface
+to the muacm core.
+
+The rest of this documentation is from the muacm repo...
+
+
 Nitro μACM Example skeleton project
 ===================================
 
