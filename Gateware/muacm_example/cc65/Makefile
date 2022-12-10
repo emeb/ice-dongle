@@ -9,7 +9,7 @@ OBJ = rom
 
 # build tools & options
 CL65 = cl65
-CLFLAGS  = -t none -O --cpu 6502 -C sbc.cfg -m $(OBJ).map
+CLFLAGS  = -t none -O --cpu 65c02 -C sbc.cfg -m $(OBJ).map
 HEXDUMP = hexdump
 HEXDUMP_ARGS = -v -e '1/1 "%02x " "\n"'
 

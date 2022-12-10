@@ -17,6 +17,7 @@ SRCS_acm-loopback = $(addprefix rtl/, \
 	cpu_65c02.v \
 	ALU.v \
 	usb_acia.v \
+	ram_32kb.v \
 	top.v \
 )
 TOPMOD := top
@@ -42,7 +43,7 @@ NEXTPNR_ARGS := --no-promote-globals
 all: $(PROJ).bin
 
 $(FAKE_HEX):
-	$(ICEBRAM) -g 8 4096 > $(FAKE_HEX)
+	$(ICEBRAM) -g 8 2048 > $(FAKE_HEX)
 
 %.json %.synth.log: $(MUACM_ILANG) $(SRCS_$(PROJ)) $(FAKE_HEX)
 	$(YOSYS) -L $*.synth.log -p 'read_verilog $(YOSYS_READ_ARGS) $(SRCS_$(PROJ)); read_ilang $(MUACM_ILANG); synth_ice40 $(YOSYS_SYNTH_ARGS) -top $(TOPMOD) -json $*.json'
