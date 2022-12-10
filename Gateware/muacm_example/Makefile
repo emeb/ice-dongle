@@ -23,9 +23,15 @@ TOPMOD := top
 
 MUACM_ILANG := ip/muacm.ilang
 
+# preparing the machine code
+FAKE_HEX =	rom.hex
+REAL_HEX =  code.hex
+
 YOSYS    := yosys
 NEXTPNR  := nextpnr-ice40
 ICEPACK  := icepack
+ICEBRAM  := icebram
+CDCPROG = cdc_prog
 DFU_UTIL := dfu-util
 
 BOARD_DEFINE := BOARD_$(shell echo $(BOARD) | tr a-z\- A-Z_)
@@ -35,25 +41,42 @@ NEXTPNR_ARGS := --no-promote-globals
 
 all: $(PROJ).bin
 
+$(FAKE_HEX):
+	$(ICEBRAM) -g 8 4096 > $(FAKE_HEX)
 
-%.json %.synth.log: $(MUACM_ILANG) $(SRCS_$(PROJ))
+%.json %.synth.log: $(MUACM_ILANG) $(SRCS_$(PROJ)) $(FAKE_HEX)
 	$(YOSYS) -L $*.synth.log -p 'read_verilog $(YOSYS_READ_ARGS) $(SRCS_$(PROJ)); read_ilang $(MUACM_ILANG); synth_ice40 $(YOSYS_SYNTH_ARGS) -top $(TOPMOD) -json $*.json'
 
 %.asc %.pnr.log: $(PCF) %.json
 	$(NEXTPNR) $(NEXTPNR_ARGS) --$(DEVICE) --package $(PACKAGE) --json $*.json --pcf $(PCF) --log $*.pnr.log --asc $*.asc
 
-%.bin: %.asc
-	$(ICEPACK) -s $< $@
+$(REAL_HEX):
+	$(MAKE) -C cc65/ rom.hex
+	cp cc65/rom.hex ./$(REAL_HEX)
+		
+%.bin: %.asc $(REAL_HEX)
+	$(ICEBRAM) $(FAKE_HEX) $(REAL_HEX) < $< > temp.asc
+	$(ICEPACK) temp.asc $@
 
 %.ilang: %.ilang.bz2
 	bzcat $< > $@
 
-
 prog: $(PROJ).bin
+	$(CDCPROG) -p /dev/ttyACM0 $<
+
+recode:
+	rm -f $(REAL_HEX) $(PROJ).bin
+	$(MAKE) prog
+    
+flash: $(PROJ).bin
+	$(CDCPROG) -w -p /dev/ttyACM0 $<
+
+dfu: $(PROJ).bin
 	$(DFU_UTIL) -a 0 -R -D $<
 
 clean:
-	rm -f *.json *.asc *.bin *.log
+	$(MAKE) -C cc65/ clean
+	rm -f *.json *.asc *.bin *.log *.hex
 
 .PHONY: all clean
 .PRECIOUS: %.ilang %.json %.asc %.bin
