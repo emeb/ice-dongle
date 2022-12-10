@@ -12,6 +12,16 @@ set_io -nowarn -pullup yes -pullup_resistor 10K btn 2
 set_io -nowarn clk_in 35
 set_frequency clk_in 12
 
+# SPI
+set_io spi0_mosi 14
+set_io spi0_miso 17
+set_io spi0_sclk 15
+set_io spi0_cs0 16
+set_io spi0_wp 18
+set_io spi0_hld 19
+set_io spi0_cs1 6
+
+
 # RGB
 set_io -nowarn RGB0 39
 set_io -nowarn RGB1 40

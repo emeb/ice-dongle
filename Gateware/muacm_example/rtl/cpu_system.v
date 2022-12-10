@@ -6,12 +6,22 @@
 module cpu_system(
 	input wire clk,
 	input wire rst,
+	
+	// USB ACIA interface
 	input wire [7:0] rx_data,
 	output wire rx_rdy,
 	input wire rx_val,
 	output wire [7:0] tx_data,
 	input wire tx_rdy,
 	output wire tx_val,
+	
+	// SPI
+	inout	wire spi0_mosi,
+			spi0_miso,
+			spi0_sclk,
+			spi0_cs0,
+	
+	// GPIO
 	input wire [7:0] gpio_i,
 	output reg [7:0] gpio_o
 );
@@ -26,7 +36,7 @@ module cpu_system(
     wire [15:0] CPU_AB;
     reg [7:0] CPU_DI;
     wire [7:0] CPU_DO;
-    wire CPU_WE, CPU_IRQ;
+    wire CPU_WE, CPU_IRQ, CPU_RDY;
     cpu_65c02 ucpu(
         .clk(clk),
         .reset(rst),
@@ -36,13 +46,14 @@ module cpu_system(
         .WE(CPU_WE),
         .IRQ(CPU_IRQ),
         .NMI(1'b0),
-        .RDY(1'b1)
+        .RDY(CPU_RDY)
     );
     
 	// address decode - not fully decoded for 512-byte memories
 	wire sel_ram0 = (CPU_AB[15] == 1'b0) ? 1 : 0;
 	wire sel_ram1 = ((CPU_AB[15:12] >= 4'h8)&&(CPU_AB[15:12] <= 4'hC)) ? 1 : 0;
 	wire sel_acia = (CPU_AB[15:8] == 8'hf0) ? 1 : 0;
+	wire sel_wb   = (CPU_AB[15:8] == 8'hf1) ? 1 : 0;
 	wire sel_gpio = (CPU_AB[15:8] == 8'hf2) ? 1 : 0;
 	wire sel_rom  = (CPU_AB[15:11] == 5'h1f) ? 1 : 0;
 	
@@ -75,6 +86,7 @@ module cpu_system(
 	
 	// ACIA @ F000-F0FF
 	wire [7:0] acia_do;
+	wire acia_irq;
 	usb_acia uacia(
 		.clk(clk),				// system clock
 		.rst(rst),				// system reset
@@ -89,8 +101,33 @@ module cpu_system(
 		.tx_data(tx_data),
 		.tx_rdy(tx_rdy),
 		.tx_val(tx_val),
-		.irq(CPU_IRQ)			// interrupt request
+		.irq(acia_irq)			// interrupt request
 	);
+	
+	// 256B Wishbone bus master and SB IP cores @ F100-F1FF
+	wire [7:0] wb_do;
+	wire wb_irq, wb_rdy;
+	system_bus usysbus(
+		.clk(clk),				// system clock
+		.rst(rst),				// system reset
+		.cs(sel_wb),			// chip select
+		.we(CPU_WE),			// write enable
+		.addr(CPU_AB[7:0]),		// address
+		.din(CPU_DO),			// data bus input
+		.dout(wb_do),			// data bus output
+		.rdy(wb_rdy),			// processor stall
+		.irq(wb_irq),			// interrupt request
+		.spi0_mosi(spi0_mosi),	// spi core 0 mosi
+		.spi0_miso(spi0_miso),	// spi core 0 miso
+		.spi0_sclk(spi0_sclk),	// spi core 0 sclk
+		.spi0_cs0(spi0_cs0)		// spi core 0 cs
+	);
+	
+	// combine IRQs
+	assign CPU_IRQ = acia_irq | wb_irq;
+	
+	// combine RDYs
+	assign CPU_RDY = wb_rdy;
 	
 	// 256B GPIO & write protects @ F200-F2FF
 	reg [7:0] gpio_do;
@@ -132,14 +169,16 @@ module cpu_system(
 	// data mux
 	reg [3:0] mux_sel;
 	always @(posedge clk)
-		mux_sel <= {sel_rom,sel_gpio,sel_acia,sel_ram1,sel_ram0};
+		if(CPU_RDY)
+			mux_sel <= {sel_rom,sel_gpio,sel_wb,sel_acia,sel_ram1,sel_ram0};
 	always @(*)
 		casez(mux_sel)
-			5'b00001: CPU_DI = ram0_do;
-			5'b00010: CPU_DI = ram1_do;
-			5'b00100: CPU_DI = acia_do;
-			5'b01000: CPU_DI = gpio_do;
-			5'b10000: CPU_DI = rom_do;
+			6'b000001: CPU_DI = ram0_do;
+			6'b00001Z: CPU_DI = ram1_do;
+			6'b0001ZZ: CPU_DI = acia_do;
+			6'b001ZZZ: CPU_DI = wb_do;
+			6'b01ZZZZ: CPU_DI = gpio_do;
+			6'b1ZZZZZ: CPU_DI = rom_do;
 			default: CPU_DI = rom_do;
 		endcase
 `endif

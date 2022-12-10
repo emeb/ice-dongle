@@ -6,12 +6,15 @@
 ;
 ; Write a string to the ACIA TX
 
+.define   ACIA_CTRL $F000    ;  ACIA control register location
+.define   ACIA_DATA $F001    ;  ACIA data register location
+
+.export         _acia_init
 .export         _acia_tx_str
 .export         _acia_tx_chr
 .export         _acia_rx_chr
+.export         _acia_isr
 .exportzp       _acia_data: near
-
-.include  "fpga.inc"
 
 .zeropage
 
@@ -19,6 +22,17 @@ _acia_data:     .res 2, $00        ;  Reserve a local zero page pointer
 
 .segment  "CODE"
 
+; ---------------------------------------------------------------------------
+; initialize the ACIA
+
+.proc _acia_init: near
+		lda 	#$03			; reset ACIA
+		sta		ACIA_CTRL
+		lda		#$00			; normal running
+		sta		ACIA_CTRL
+        rts						;  Return
+.endproc
+        
 ; ---------------------------------------------------------------------------
 ; send a string to the ACIA
 
@@ -67,5 +81,19 @@ rxw:    lda      ACIA_CTRL       ; wait for RX full
         beq      rxw
         lda      ACIA_DATA       ; receive
         rts
+
+.endproc
+
+; ---------------------------------------------------------------------------
+; check ACIA for IRQ and echo
+.proc _acia_isr: near
+		LDA 	ACIA_CTRL
+		AND 	#$80               ; IRQ bit set?
+		BEQ 	iexit                ; no - skip
+
+; Echo RX char
+		JSR 	_acia_rx_chr       ; get RX char
+		JSR 	_acia_tx_chr       ; send TX char
+iexit:	rts
 
 .endproc

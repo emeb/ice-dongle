@@ -4,13 +4,16 @@
 ; 03-04-19 E. Brombaugh
 ; ---------------------------------------------------------------------------
 
+.import   _acia_init
 .import   _acia_tx_str
 .import   _acia_tx_chr
 .import   _acia_rx_chr
+.import   _spi_init
+.import   _spi_flash_read
 .import   _cmon
 .export   _init
 
-.include  "fpga.inc"
+BAS_BASE		= $A000		; BASIC base offset
 
 .zeropage
 
@@ -28,10 +31,26 @@ _init:     ldx #$ff             ; initiaize stack pointer
 		   sta _led_bits
 
 ; initialize ACIA
-		   lda #$03				; reset ACIA
-		   sta ACIA_CTRL
-		   lda #$00				; normal running
-		   sta ACIA_CTRL
+		   jsr _acia_init
+		   
+; Init SPI port
+		   jsr _spi_init
+		   
+.if 1
+; read 8kB from flash into RAM
+			lda #$00				; count 7:0
+			sta $fc
+			lda #$20				; count 15:8
+			sta $fd
+			lda #.lobyte(BAS_BASE)	; dest addr
+			sta $fe
+			lda #.hibyte(BAS_BASE)
+			sta $ff
+			ldx #$04				; source addr 23:16
+			ldy #$00				; source addr 15:8
+			lda #$00				; source addr 7:0
+			jsr _spi_flash_read
+.endif
 
 ; give the system time to wake up
 		   lda #32

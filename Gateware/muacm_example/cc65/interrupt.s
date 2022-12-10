@@ -9,10 +9,8 @@
 ;
 ; Checks for a BRK instruction, handles ACIA RX
 
-.import   _acia_rx_chr, _acia_tx_chr
+.import   _acia_rx_chr, _acia_tx_chr, _acia_isr
 .export   _irq_int, _nmi_int
-
-.include  "fpga.inc"
 
 .segment  "CODE"
 
@@ -34,21 +32,9 @@ _irq_int:  PHA                    ; Save accumulator contents to stack
            AND #$10               ; Isolate B status bit
            BNE break              ; If B = 1, BRK detected
 
-; ---------------------------------------------------------------------------
-; check ACIA for IRQ
-           LDA ACIA_CTRL
-           AND #$80               ; IRQ bit set?
-           BEQ irq                ; no - skip
+           JSR _acia_isr          ; handle serial I/O
 		   
-; ---------------------------------------------------------------------------
-; Echo RX char
-           JSR _acia_rx_chr       ; get RX char
-           JSR _acia_tx_chr       ; send TX char
-		   
-; ---------------------------------------------------------------------------
-; IRQ detected, return
-
-irq:       PLA                    ; Restore Y register contents
+           PLA                    ; Restore Y register contents
 		   TAY
            PLA                    ; Restore X register contents
            TAX

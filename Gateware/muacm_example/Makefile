@@ -18,6 +18,8 @@ SRCS_acm-loopback = $(addprefix rtl/, \
 	ALU.v \
 	usb_acia.v \
 	ram_32kb.v \
+	system_bus.v \
+	wishbone.v \
 	top.v \
 )
 TOPMOD := top

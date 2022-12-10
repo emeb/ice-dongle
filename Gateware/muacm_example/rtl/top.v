@@ -17,6 +17,15 @@ module top (
 	// Clock
 	input  wire clk_in,
 	
+	// SPI port 0
+	inout	wire spi0_mosi,
+			spi0_miso,
+			spi0_sclk,
+			spi0_cs0,
+			spi0_wp,
+			spi0_hld,
+			spi0_cs1,
+	
 	// LED - via drivers
 	output RGB0, RGB1, RGB2
 );
@@ -147,9 +156,16 @@ module top (
 		.tx_data(in_usr_data),
 		.tx_rdy (in_usr_ready),
 		.tx_val (in_usr_valid),
+		.spi0_mosi(spi0_mosi),
+		.spi0_miso(spi0_miso),
+		.spi0_sclk(spi0_sclk),
+		.spi0_cs0(spi0_cs0),
 		.gpio_i (8'h00),
 		.gpio_o (gpio_o)
 	);
+	assign spi0_wp = 1'b1;
+	assign spi0_hld = 1'b1;
+	assign spi0_cs1 = 1'b1;
 `endif
 
 
