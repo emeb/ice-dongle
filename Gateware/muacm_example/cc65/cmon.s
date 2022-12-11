@@ -23,8 +23,8 @@
 
 .feature labels_without_colons
 
-.import		_acia_rx_chr
-.import		_acia_tx_chr
+.import		_input
+.import		_output
 .export		_cmon
 
 WIDTH  = 8         ;must be a power of 2
@@ -32,11 +32,11 @@ HEIGHT = 16
 
 
 .macro putc
-       JSR _acia_tx_chr	; EMEB - modified for icestick_6502 ROM
+       JSR _output	; EMEB - modified for up5k ROM
 .endmacro
 
 .macro getc
-       JSR _acia_rx_chr	; EMEB - modified for icestick_6502 ROM
+       JSR _input	; EMEB - modified for up5k ROM
 .endmacro
 
 ; cmon zero page usage

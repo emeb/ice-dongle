@@ -1,95 +1,102 @@
 ; ---------------------------------------------------------------------------
-; init.s
-; icestick_6502 main assembly routine
-; 03-04-19 E. Brombaugh
+; init.s - 6502 initializer for up5k_basic project
+; 2019-03-20 E. Brombaugh
+; Note - requires 65C02 support
 ; ---------------------------------------------------------------------------
+;
 
-.import   _acia_init
-.import   _acia_tx_str
-.import   _acia_tx_chr
-.import   _acia_rx_chr
-.import   _spi_init
-.import   _spi_flash_read
-.import   _cmon
-.export   _init
-
-BAS_BASE		= $A000		; BASIC base offset
+.import		_acia_init
+.import		_spi_init
+.import		_basic_init
+.import		_cmon
+.import		_input
+.import		_output
+.import		_strout
+.import		BAS_COLDSTART
+.import		BAS_WARMSTART
 
 .zeropage
 
-_led_bits:      .res 1, $00        ;  Reserve a local zero page pointer
 _dly_cnt:       .res 1, $00        ;  Reserve a local zero page pointer
 
 .segment  "CODE"
+; ---------------------------------------------------------------------------
+; Reset vector
+
+_init:		ldx	#$28				; Initialize stack pointer to $0128
+			txs
+			cld						; Clear decimal mode
 
 ; ---------------------------------------------------------------------------
-; Execution starts here
-
-_init:     ldx #$ff             ; initiaize stack pointer
-		   txs
-		   lda #8               ; initialize led data
-		   sta _led_bits
-
-; initialize ACIA
-		   jsr _acia_init
-		   
-; Init SPI port
-		   jsr _spi_init
-		   
-.if 1
-; read 8kB from flash into RAM
-			lda #$00				; count 7:0
-			sta $fc
-			lda #$20				; count 15:8
-			sta $fd
-			lda #.lobyte(BAS_BASE)	; dest addr
-			sta $fe
-			lda #.hibyte(BAS_BASE)
-			sta $ff
-			ldx #$04				; source addr 23:16
-			ldy #$00				; source addr 15:8
-			lda #$00				; source addr 7:0
-			jsr _spi_flash_read
-.endif
-
+; Init ACIA
+			jsr _acia_init
+			
+; ---------------------------------------------------------------------------
 ; give the system time to wake up
 		   lda #32
 		   jsr delay
 
-.if 0
-; send startup message
-		   lda # .lobyte(start_str)
-		   ldx # .hibyte(start_str)
-		   jsr _acia_tx_str
+; ---------------------------------------------------------------------------
+; Startup Message
+			lda #.lobyte(startup_msg)
+			ldy #.hibyte(startup_msg)
+			jsr _strout
+			
+; ---------------------------------------------------------------------------
+; Init spi
+			jsr _spi_init
 
-; enable ACIA RX IRQ
-		   lda #$80				; rx irq enable
-		   sta ACIA_CTRL
-		   cli					; enable irqs
-	
-; main loop
-lp:        lda #16				; delay 16 outer loops
-		   jsr delay
-		   lda _led_bits		; get LED state
-		   sta GPIO_DATA		; save to GPIO
-		   clc					; increment top 3 bits
-		   adc #32
-sld:       sta _led_bits		; save new state
-		   jmp lp				; loop forever
-.else
+; ---------------------------------------------------------------------------
+; Init BASIC
+			jsr _basic_init
+
+; ---------------------------------------------------------------------------
+; display boot prompt
+
+bp:
+			lda #.lobyte(bootprompt)
+			ldy #.hibyte(bootprompt)
+			jsr _strout
+			
+; ---------------------------------------------------------------------------
+; Cold or Warm Start
+
+bpdone:		jsr _input				; get char
+			jsr _output				; echo
+			jsr _output				; echo - why needed twice?
+			and #$5F				; convert lowercase to uppercase
+			cmp #'D'				; D ?
+			beq diags				; Diagnostic
+bp_skip_D:	cmp #'C'				; C ?
+			bne bp_skip_C
+			jmp BAS_COLDSTART		; BASIC Cold Start
+bp_skip_C:	cmp #'W'				; W ?
+			bne bp_skip_W
+			jmp BAS_WARMSTART		; BASIC Warm Start
+bp_skip_W:	cmp #'M'				; M ?
+			bne bpdone
+			; fall thru to monitor
+			
 ; ---------------------------------------------------------------------------
 ; Enter Machine-language monitor
 
 			; help msg
 			lda #.lobyte(montxt)	; display monitor text
-			ldx #.hibyte(montxt)
-			jsr _acia_tx_str
+			ldy #.hibyte(montxt)
+			jsr _strout
 			
 			; run the monitor
 			jsr _cmon
-			jmp _init				; back to full init
-.endif
-	
+			bra _init				; back to full init
+
+; ---------------------------------------------------------------------------
+; Diagnostics - currently unused
+
+diags:		lda #.lobyte(diagtxt)	; display diag text
+			ldy #.hibyte(diagtxt)
+			jsr _strout
+			bra bp					; back to boot prompt
+
 ; ---------------------------------------------------------------------------
 ; delay routine
 delay:     sta _dly_cnt			; save loop count
@@ -111,13 +118,51 @@ d3:	       dey
 		   tax
 		   rts
 
-.segment  "RODATA"
+; ---------------------------------------------------------------------------
+; Non-maskable interrupt (NMI) service routine
+
+_nmi_int:	RTI						; Return from all NMI interrupts
 
 ; ---------------------------------------------------------------------------
-; startup message
+; Maskable interrupt (IRQ) service routine
 
-start_str:
-.byte $0A, $0A, $0D, "ice-dongle 6502 serial test.", $0A, $0A, $0D, $00
+_irq_int:	pha						; Save accumulator contents to stack
+			phx						; Save X register contents to stack
+			phy						; Save Y register to stack
+		   
+; ---------------------------------------------------------------------------
+; check for BRK instruction
+
+			tsx						; Transfer stack pointer to X
+			lda $104,X				; Load status register contents (SP + 4)
+			and #$10				; Isolate B status bit
+			bne break				; If B = 1, BRK detected
+
+; ---------------------------------------------------------------------------
+; Restore state and exit ISR
+
+irq_exit:	ply						; Restore Y register contents
+			plx						; Restore X register contents
+			pla						; Restore accumulator contents
+			rti						; Return from all IRQ interrupts
+
+; ---------------------------------------------------------------------------
+; BRK detected, stop
+
+break:		jmp break				; If BRK is detected, something very bad
+									;   has happened, so loop here forever
+									
+; ---------------------------------------------------------------------------
+; Message Strings
+
+startup_msg:
+.byte		" ", 10, 13, "ice-dongle starting...", 0
+
+bootprompt:
+.byte		10, 13, "D/C/W/M? ", 0
+
+diagtxt:
+.byte		10, 13, "Diagnostics not available", 0
 
 montxt:
 .byte		10, 13, "C'MON Monitor", 10, 13
@@ -125,3 +170,11 @@ montxt:
 .byte		"AAAA@DD,DD,... - store DD bytes @ AAAA", 10, 13
 .byte		"AAAAg - go @ AAAA", 10, 13, 0
 
+; ---------------------------------------------------------------------------
+; table of vectors for 6502
+
+.segment  "VECTORS"
+
+.addr      _nmi_int					; NMI vector
+.addr      _init					; Reset vector
+.addr      _irq_int					; IRQ/BRK vector
