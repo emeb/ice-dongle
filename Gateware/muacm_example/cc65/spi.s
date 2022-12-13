@@ -84,11 +84,9 @@ si_done:
 
 ; ---------------------------------------------------------------------------
 ; spi send routine - single byte, with CS
-; data in A
+; CS bits in A, data in X
 
 .proc _spi_tx_byte: near
-			tax
-			lda #$fe				; lower cs0
 			sta SPI0_BASE+SPICSR
 			jsr spi_tx_wait			; wait for tx ready
 			stx SPI0_BASE+SPITXDR	; send tx
@@ -104,7 +102,8 @@ si_done:
 .proc _spi_flash_init: near
 ; set up the flash memory
 			; send wake up cmd to flash (FPGA init may power it down)
-			lda FLASH_WKUP			; Wake up
+			lda #$fe				; cs0
+			ldx FLASH_WKUP			; Wake up
 			jsr _spi_tx_byte
 			rts
 .endproc
@@ -132,13 +131,27 @@ hdr_lp:		pha						; temp save data
 ; low dest addr in $fe, high dest addr in $ff
 ; low count in $fc, hight count in $fd
 ; low source addr in A, mid source addr in Y, high source addr in X
-
 .proc _spi_flash_read: near
 ; save source addr
 			stx $f9					; high byte
 			sty $fa					; mid byte
 			sta $fb					; low byte
 			
+; lower cs0
+			lda #$fe
+			sta SPI0_BASE+SPICSR
+			
+; common memory access
+			jmp _spi_mem_read
+.endproc
+
+; ---------------------------------------------------------------------------
+; spi mem read - 64kB max
+; low dest addr in $fe, high dest addr in $ff
+; low count in $fc, hight count in $fd
+; low source addr in $fb, mid source addr in $fa, high source addr in $f9
+; assumes CS already dropped for target device
+.proc _spi_mem_read: near
 ; invert count to avoid slow 16-bit decrement
 			clc
 			lda $fc
@@ -150,10 +163,6 @@ hdr_lp:		pha						; temp save data
 			adc #$00
 			sta $fd
 
-; lower cs0
-			lda #$fe
-			sta SPI0_BASE+SPICSR
-			
 ; send header w/ read cmd + source addr
 			lda FLASH_READ			; read command
 			jsr _spi_flash_hdr
@@ -228,7 +237,9 @@ sfr_skp0:	inc $fc					; inc count
 
 .proc _spi_flash_eraseblk: near
 ; write enable for erase
-			lda FLASH_WEN
+
+			lda #$fe				; cs0
+			ldx FLASH_WEN
 			jsr _spi_tx_byte
 
 ; send erase command
@@ -250,7 +261,8 @@ sfr_skp0:	inc $fc					; inc count
 
 .proc _spi_flash_writepg: near
 ; write enable for write
-			lda FLASH_WEN
+			lda #$fe				; cs0
+			ldx FLASH_WEN
 			jsr _spi_tx_byte
 			
 ; lower cs0

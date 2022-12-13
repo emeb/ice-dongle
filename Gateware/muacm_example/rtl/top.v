@@ -160,12 +160,12 @@ module top (
 		.spi0_miso(spi0_miso),
 		.spi0_sclk(spi0_sclk),
 		.spi0_cs0(spi0_cs0),
+		.spi0_cs1(spi0_cs1),
 		.gpio_i (8'h00),
 		.gpio_o (gpio_o)
 	);
 	assign spi0_wp = 1'b1;
 	assign spi0_hld = 1'b1;
-	assign spi0_cs1 = 1'b1;
 `endif
 
 

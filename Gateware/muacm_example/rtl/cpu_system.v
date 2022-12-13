@@ -20,6 +20,7 @@ module cpu_system(
 			spi0_miso,
 			spi0_sclk,
 			spi0_cs0,
+			spi0_cs1,
 	
 	// GPIO
 	input wire [7:0] gpio_i,
@@ -120,7 +121,8 @@ module cpu_system(
 		.spi0_mosi(spi0_mosi),	// spi core 0 mosi
 		.spi0_miso(spi0_miso),	// spi core 0 miso
 		.spi0_sclk(spi0_sclk),	// spi core 0 sclk
-		.spi0_cs0(spi0_cs0)		// spi core 0 cs
+		.spi0_cs0(spi0_cs0),	// spi core 0 cs
+		.spi0_cs1(spi0_cs1)		// spi core 0 cs
 	);
 	
 	// combine IRQs

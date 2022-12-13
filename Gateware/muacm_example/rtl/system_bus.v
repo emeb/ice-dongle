@@ -16,7 +16,8 @@ module system_bus(
 	inout spi0_mosi,		// spi core 0 mosi
 	inout spi0_miso,		// spi core 0 miso
 	inout spi0_sclk,		// spi core 0 sclk
-	inout spi0_cs0			// spi core 0 cs
+	inout spi0_cs0,			// spi core 0 cs0
+	inout spi0_cs1			// spi core 0 cs1
 );
 
 	// the wishbone master
@@ -47,6 +48,7 @@ module system_bus(
 	wire soe_0, mi_0, so_0;			// MISO components
 	wire sckoe_0, scko_0, scki_0;	// SCLK components
 	wire mcsnoe_00, mcsno_00, scsni_0;		// CS0 components
+	wire mcsnoe_01, mcsno_01;		// CS1 components
 	SB_SPI #(
 		.BUS_ADDR74("0b0000")
 	) 
@@ -93,11 +95,11 @@ module system_bus(
 		.SCKOE(sckoe_0),
 		.MCSNO3(),
 		.MCSNO2(),
-		.MCSNO1(),
+		.MCSNO1(mcsno_01),
 		.MCSNO0(mcsno_00),
 		.MCSNOE3(),
 		.MCSNOE2(),
-		.MCSNOE1(),
+		.MCSNOE1(mcsnoe_01),
 		.MCSNOE0(mcsnoe_00)
 	);
 	
@@ -165,7 +167,7 @@ module system_bus(
 		.PULLUP(1'b1),
 		.NEG_TRIGGER(1'b0),
 		.IO_STANDARD("SB_LVCMOS")
-	) ucs0 (
+	) ucs00 (
 		.PACKAGE_PIN(spi0_cs0),
 		.LATCH_INPUT_VALUE(1'b0),
 		.CLOCK_ENABLE(1'b0),
@@ -175,6 +177,25 @@ module system_bus(
 		.D_OUT_0(mcsno_00),
 		.D_OUT_1(1'b0),
 		.D_IN_0(scsni_0),		// unused to prevent accidental slave mode
+		.D_IN_1()
+	);
+
+	// CS1 driver
+	SB_IO #(
+		.PIN_TYPE(6'b101001),
+		.PULLUP(1'b1),
+		.NEG_TRIGGER(1'b0),
+		.IO_STANDARD("SB_LVCMOS")
+	) ucs01 (
+		.PACKAGE_PIN(spi0_cs1),
+		.LATCH_INPUT_VALUE(1'b0),
+		.CLOCK_ENABLE(1'b0),
+		.INPUT_CLK(1'b0),
+		.OUTPUT_CLK(1'b0),
+		.OUTPUT_ENABLE(1'b1),	// or mcsnoe_01 for hi-z when inactive
+		.D_OUT_0(mcsno_01),
+		.D_OUT_1(1'b0),
+		.D_IN_0(),		// unused to prevent accidental slave mode
 		.D_IN_1()
 	);
 endmodule
