@@ -87,7 +87,10 @@ module usb_acia(
 			tx_data <= din;
 	
 	// RX handling
-	wire rx_clear = cs & rs & ~we;
+	reg rx_clear;
+	always @(posedge clk)
+		rx_clear = cs & rs & ~we;
+	
 	always @(posedge clk)
 		if(rst)
 			rx_rdy <= 1'b1;

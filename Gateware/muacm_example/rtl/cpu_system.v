@@ -56,6 +56,7 @@ module cpu_system(
 	wire sel_acia = (CPU_AB[15:8] == 8'hf0) ? 1 : 0;
 	wire sel_wb   = (CPU_AB[15:8] == 8'hf1) ? 1 : 0;
 	wire sel_gpio = (CPU_AB[15:8] == 8'hf2) ? 1 : 0;
+	wire sel_time = (CPU_AB[15:8] == 8'hf3) ? 1 : 0;
 	wire sel_rom  = (CPU_AB[15:11] == 5'h1f) ? 1 : 0;
 	
 	// RAM write protects
@@ -159,7 +160,38 @@ module cpu_system(
 				2'b10: gpio_do <= ram0_wp;
 				2'b11: gpio_do <= ram1_wp;
 			endcase
-			
+	
+	// 32-bit microsecond timer
+	reg [4:0] prescale;
+	reg [31:0] timer;
+	always @(posedge clk)
+		if(rst)
+		begin
+			prescale <= 5'b0;
+			timer <= 32'b0;
+		end
+		else
+		begin
+			if(prescale == 5'd23)
+			begin
+				prescale <= 5'd0;
+				timer <= timer + 1;
+			end
+			else
+				prescale <= prescale + 1;
+		end
+		
+	// read
+	reg [7:0] time_do;
+	always @(posedge clk)
+		if(!CPU_WE & sel_time)
+			case(CPU_AB[1:0])
+				2'b00: time_do <= timer[7:0];
+				2'b01: time_do <= timer[15:8];
+				2'b10: time_do <= timer[23:16];
+				2'b11: time_do <= timer[31:24];
+			endcase
+	
 	// 2kB ROM @ F800-FFFF
     reg [7:0] rom_mem[2047:0];
 	reg [7:0] rom_do;
@@ -169,18 +201,19 @@ module cpu_system(
 		rom_do <= rom_mem[CPU_AB[10:0]];
 
 	// data mux
-	reg [3:0] mux_sel;
+	reg [7:0] mux_sel;
 	always @(posedge clk)
 		if(CPU_RDY)
-			mux_sel <= {sel_rom,sel_gpio,sel_wb,sel_acia,sel_ram1,sel_ram0};
+			mux_sel <= {sel_rom,sel_time,sel_gpio,sel_wb,sel_acia,sel_ram1,sel_ram0};
 	always @(*)
 		casez(mux_sel)
-			6'b000001: CPU_DI = ram0_do;
-			6'b00001Z: CPU_DI = ram1_do;
-			6'b0001ZZ: CPU_DI = acia_do;
-			6'b001ZZZ: CPU_DI = wb_do;
-			6'b01ZZZZ: CPU_DI = gpio_do;
-			6'b1ZZZZZ: CPU_DI = rom_do;
+			7'b0000001: CPU_DI = ram0_do;
+			7'b000001Z: CPU_DI = ram1_do;
+			7'b00001ZZ: CPU_DI = acia_do;
+			7'b0001ZZZ: CPU_DI = wb_do;
+			7'b001ZZZZ: CPU_DI = gpio_do;
+			7'b01ZZZZZ: CPU_DI = time_do;
+			7'b1ZZZZZZ: CPU_DI = rom_do;
 			default: CPU_DI = rom_do;
 		endcase
 `endif
