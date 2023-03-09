@@ -24,7 +24,10 @@ module cpu_system(
 	
 	// GPIO
 	input wire [7:0] gpio_i,
-	output reg [7:0] gpio_o
+	output reg [7:0] gpio_o,
+	
+	// RGB
+	output wire [2:0] rgb_pad
 );
 //`define loopback
 `ifdef loopback
@@ -57,6 +60,7 @@ module cpu_system(
 	wire sel_wb   = (CPU_AB[15:8] == 8'hf1) ? 1 : 0;
 	wire sel_gpio = (CPU_AB[15:8] == 8'hf2) ? 1 : 0;
 	wire sel_time = (CPU_AB[15:8] == 8'hf3) ? 1 : 0;
+	wire sel_rgb  = (CPU_AB[15:8] == 8'hf4) ? 1 : 0;
 	wire sel_rom  = (CPU_AB[15:11] == 5'h1f) ? 1 : 0;
 	
 	// RAM write protects
@@ -191,7 +195,17 @@ module cpu_system(
 				2'b10: time_do <= timer[23:16];
 				2'b11: time_do <= timer[31:24];
 			endcase
-	
+	// RGB LED driver is write-only
+	rgb_driver urgb(
+		.clk(clk),				// system clock
+		.rst(rst),				// system reset
+		.cs(sel_rgb),			// chip select
+		.we(CPU_WE),			// write enable
+		.addr(CPU_AB[4:0]),		// 5-bit address
+		.din(CPU_DO),			// 8-bit data bus input
+		.rgb_pad(rgb_pad)
+	);
+			
 	// 2kB ROM @ F800-FFFF
     reg [7:0] rom_mem[2047:0];
 	reg [7:0] rom_do;

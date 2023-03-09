@@ -8,6 +8,7 @@ DEVICE  := $(shell awk '/$(H)$(H) dev:/{print $$3; exit 1}' $(PCF) && echo up5k)
 PACKAGE := $(shell awk '/$(H)$(H) pkg:/{print $$3; exit 1}' $(PCF) && echo sg48)
 
 SRCS_acm-loopback = $(addprefix rtl/, \
+	rgb_driver.v \
 	dfu_helper.v \
 	fifo_sync_shift.v \
 	muacm_xclk.v \
@@ -30,10 +31,11 @@ MUACM_ILANG := ip/muacm.ilang
 FAKE_HEX =	rom.hex
 REAL_HEX =  code.hex
 
-YOSYS    := yosys
-NEXTPNR  := nextpnr-ice40
-ICEPACK  := icepack
-ICEBRAM  := icebram
+TOOLDIR  := /opt/openfpga/oss-cad-suite_05-18-2022/bin
+YOSYS    := $(TOOLDIR)/yosys
+NEXTPNR  := $(TOOLDIR)/nextpnr-ice40
+ICEPACK  := $(TOOLDIR)/icepack
+ICEBRAM  := $(TOOLDIR)/icebram
 CDCPROG = cdc_prog
 DFU_UTIL := dfu-util
 

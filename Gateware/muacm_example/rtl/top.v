@@ -162,7 +162,8 @@ module top (
 		.spi0_cs0(spi0_cs0),
 		.spi0_cs1(spi0_cs1),
 		.gpio_i (8'h00),
-		.gpio_o (gpio_o)
+		.gpio_o (gpio_o),
+		.rgb_pad ({RGB2,RGB1,RGB0})
 	);
 	assign spi0_wp = 1'b1;
 	assign spi0_hld = 1'b1;
@@ -245,39 +246,4 @@ module top (
 	assign rst_usr = rst_usb;
 
 `endif
-
-	// LED dimming PWM
-	reg [3:0] pwmcnt;
-	reg pwm;
-	always @(posedge clk_usr)
-	begin
-		if(rst_usr)
-		begin
-			pwmcnt <= 4'h0;
-			pwm <= 1'b0;
-		end
-		else
-		begin
-			pwmcnt <= pwmcnt + 4'h1;
-			pwm <= pwmcnt > 0 ? 1'b0 : 1'b1;
-		end
-	end
-	
-	// RGB LED Driver IP core
-	SB_RGBA_DRV #(
-		.CURRENT_MODE("0b1"),
-		.RGB0_CURRENT("0b000001"),
-		.RGB1_CURRENT("0b000001"),
-		.RGB2_CURRENT("0b000011")
-	) RGBA_DRIVER (
-		.CURREN(1'b1),
-		.RGBLEDEN(pwm),
-		.RGB0PWM(gpio_o[7]),
-		.RGB1PWM(gpio_o[6]),
-		.RGB2PWM(gpio_o[5]),
-		.RGB0(RGB0),
-		.RGB1(RGB1),
-		.RGB2(RGB2)
-	);
-
 endmodule // top
