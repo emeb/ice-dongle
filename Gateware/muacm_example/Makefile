@@ -31,7 +31,8 @@ MUACM_ILANG := ip/muacm.ilang
 FAKE_HEX =	rom.hex
 REAL_HEX =  code.hex
 
-TOOLDIR  := /opt/openfpga/oss-cad-suite_05-18-2022/bin
+#TOOLDIR  := /opt/openfpga/oss-cad-suite_05-18-2022/bin
+TOOLDIR  := /opt/openfpga/oss-cad-suite_03-09-2023/bin
 YOSYS    := $(TOOLDIR)/yosys
 NEXTPNR  := $(TOOLDIR)/nextpnr-ice40
 ICEPACK  := $(TOOLDIR)/icepack

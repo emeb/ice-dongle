@@ -155,7 +155,7 @@ sv_hiok:	lda BAS_INTLO		; get low byte
 			
 ; compute block address
 			clc
-			adc #$0A			; offset to start of region $50000
+			adc #$20			; offset to start of region $100000
 			ror					; adjust for 32k
 			sta $f9				; save high addr (Note - Big Endian!)
 			lda	#$00
